@@ -1,0 +1,29 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:12.6'
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_DB: paper_programs_development
+      POSTGRES_HOST_AUTH_METHOD: trust
+  web:
+    build: .
+    ports:
+     - "3000:3000"
+    depends_on:
+     - postgres
+    volumes:
+     - .:/app
+     - /app/node_modules/
+    environment:
+     - NODE_ENV=docker
+    command: [
+      "./scripts/wait-for-it.sh", "postgres:5432", "--",
+      "npm", "run", "dev:docker",
+    ]
+    restart: always
+volumes:
+  postgres:
+    driver: local
